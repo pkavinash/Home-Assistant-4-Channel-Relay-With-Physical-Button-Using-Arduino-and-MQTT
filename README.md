@@ -21,18 +21,18 @@
 ## Hardware Connection
 
 ### NodeMCU to 4 Channel Relay Module Connection
-D0 or 16 to IN1
-D1 or 5 to IN2
-D2 or 4 to IN3
-D3 or 0 to IN4
-VV to VCC
-GND to GND
+D0 or 16 to IN1</br>
+D1 or 5 to IN2</br>
+D2 or 4 to IN3</br>
+D3 or 0 to IN4</br>
+VV to VCC</br>
+GND to GND</br>
 
 ### NodeMCU Connection for Switch Actions (NodeMCU to NodeMCU)
-D4 or 2 to GND (in NodeMCU)
-D5 or 14 to GND (in NodeMCU)
-D6 or 12 to GND (in NodeMCU)
-D7 or 13 to GND (in NodeMCU)
+D4 or 2 to GND (in NodeMCU) </br>
+D5 or 14 to GND (in NodeMCU) </br>
+D6 or 12 to GND (in NodeMCU) </br>
+D7 or 13 to GND (in NodeMCU) </br>
 
 
 ## Software Setup
