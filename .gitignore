@@ -1,2 +1,3 @@
 my_secret.h
+.gitignore
 *.bin
