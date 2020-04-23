@@ -124,4 +124,8 @@ switch 4:
  - Go to the <code>settings.h</code> tab. This is where all the customisable settings are. You should be able to change almost everything from there before compiling.
  - Go to the <code>secret.h</code> tab. Here you change Wifi settings, server settings and few other parameters as per your project requirement.
  
-
+## Screenshot
+<img src="/Images/1.jpg" width="" height="" style="max-width:100%;"></br>
+<img src="/Images/2.jpg" width="" height="" style="max-width:100%;"></br>
+<img src="/Images/3.png" width="350" height="" style="max-width:100%;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<img src="/Images/4.png" width="350" height="" style="max-width:100%;">
