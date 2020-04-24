@@ -2,7 +2,7 @@
 //                           Settings                          //
 /////////////////////////////////////////////////////////////////
 
-const char BUILD_NUMBER[] = "0";    // Build number is something like change some variables in code and building binary file. 
+int BUILD_NUMBER = 0;         // Build number is something like change some variables in code and building binary file. 
 
 /* Relay to NodeMCU Connection */
 

@@ -24,6 +24,7 @@
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
 #include <ArduinoOTA.h>
+#include <ArduinoJson.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266httpUpdate.h>
 
@@ -151,6 +152,15 @@ void callback(char * topic, byte * payload, unsigned int length) {
   }
 }
 
+void publishData(int p_buildNumber) {                                 // function called to publish the temperature and the humidity  
+  StaticJsonDocument < 200 > jsonDocument;                            // create a JSON object  
+  jsonDocument["buildNumber"] = (String) p_buildNumber;               // INFO: the data must be converted into a string; a problem occurs when using floats...
+  char data[200];
+  serializeJson(jsonDocument, data);
+  client.publish(firmwareBuildNumberTopic, data, true);               //Publishing data to MQTT server as Json
+  yield();
+}
+
 void checkPhysicalButton() {
   if (digitalRead(PUSH_BUTTON_1) == 0) {
     if (pushButton1State != LOW) {                        // PushButton1State is used to avoid sequential toggles
@@ -247,13 +257,13 @@ void reconnectMQTT() {
        
       if (client.connect("ESP8266Client", mqttUser, mqttPassword)) {      // Delete "mqtt_username", and "mqtt_password" here if you are not using any
         Serial.print("\tMQTT Connected");
-        client.subscribe(switchTopic1);                   // If connected, subscribe to the topic(s) we want to be notified about
+        client.subscribe(switchTopic1);                                   // If connected, subscribe to the topic(s) we want to be notified about
         client.subscribe(switchTopic2);
         client.subscribe(switchTopic3);
-        client.subscribe(switchTopic4);                   // Do not forget to replicate the above line if you will have more than the above number of relay switches
+        client.subscribe(switchTopic4);                                   // Do not forget to replicate the above line if you will have more than the above number of relay switches
         client.subscribe(firmwareUpdateTopic);
         client.publish("/house/switch/Confirmfirmware/", "0");            // Sending message to MQTT server to turn off MQTT firmware upgrade button if its on
-        client.publish(firmwareBuildNumberTopic, BUILD_NUMBER);           // Sending message to MQTT server to set build number in home assistant UI
+        publishData(BUILD_NUMBER);                                        // Sending message to MQTT server to set build number in home assistant UI
       }
       else {
         Serial.println("\tFailed.");
@@ -310,8 +320,8 @@ void checkforupdate() {
       break;
     }
   } else {
+    publishData(BUILD_NUMBER);
     client.publish("/house/switch/Confirmfirmware/", "0");            // Sending message to MQTT server to turn off MQTT firmware upgrade button if its on
-    client.publish(firmwareBuildNumberTopic, BUILD_NUMBER);           // Sending message to MQTT server to set build number in home assistant UI
     Serial.print("Firmware check failed, got HTTP response code ");
     Serial.println(httpCode);
   }
