@@ -87,12 +87,12 @@ switch 4:
     qos: 0    
 ```
 
-### Add in sensor.yaml
+### Add in sensors.yaml
 ```python
   - platform: mqtt
-    name: "Build Number"
+    name: "MQTT Build Number"
     state_topic: "/house/switch/firmware/buildnumber/"
-    qos: 0
+    value_template: '{{ value_json.buildNumber }}'
 ```
 
 ### Add in groups.yaml
