@@ -14,7 +14,7 @@
 
 ## Installation
 
- - Open <code>secret.h</code> and change Bynk Auth code, Wifi settings, server settings and few other parameters as per your project requirement.
+ - Open <code>secret.h</code> and change Wifi settings, server settings and few other parameters as per your project requirement.
  - Open <code>settings.h</code> - Usually you don't need to change any values here, but if you need any customization feel free play with it.
 
 ## Hardware Connection
@@ -37,6 +37,28 @@ D7 or 13 to GND (in NodeMCU) </br>
 
 ### Add in configuration.yaml
 ```python
+homeassistant:
+  customize: 
+      switch.mqtt_switch_1:
+        assumed_state: false
+      switch.mqtt_switch_2:
+        assumed_state: false
+      switch.mqtt_switch_3:
+        assumed_state: false
+      switch.mqtt_switch_4:
+        assumed_state: false
+      switch.mqtt_firmware_update:
+        assumed_state: false
+
+mqtt:
+  discovery: true
+  discovery_prefix: homeassistant
+  broker: xxx.xxx.xxx.xxx
+  port: xxxx
+  client_id: Home-Assistant
+  username: Your-MQTT-Username
+  password: Your-MQTT-Password
+
 switch 1:
   - platform: mqtt
     name: "MQTT Switch 1"
@@ -44,9 +66,9 @@ switch 1:
     command_topic: "/house/switch1/"
     payload_on: "1"
     payload_off: "0"
+    optimistic: true
     qos: 0
-    retain: true 
-    
+
 switch 2:
   - platform: mqtt
     name: "MQTT Switch 2"
@@ -54,9 +76,9 @@ switch 2:
     command_topic: "/house/switch2/"
     payload_on: "1"
     payload_off: "0"
+    optimistic: true
     qos: 0
-    retain: true
-    
+
 switch 3:
   - platform: mqtt
     name: "MQTT Switch 3"
@@ -64,9 +86,9 @@ switch 3:
     command_topic: "/house/switch3/"
     payload_on: "1"
     payload_off: "0"
+    optimistic: true
     qos: 0
-    retain: true
-    
+
 switch 4:
   - platform: mqtt
     name: "MQTT Switch 4"
@@ -74,8 +96,8 @@ switch 4:
     command_topic: "/house/switch4/"
     payload_on: "1"
     payload_off: "0"
+    optimistic: true
     qos: 0
-    retain: true
 
   - platform: mqtt
     name: "MQTT Firmware Update"
@@ -84,7 +106,7 @@ switch 4:
     payload_on: "1"
     payload_off: "0"
     optimistic: true
-    qos: 0    
+    qos: 0   
 ```
 
 ### Add in sensors.yaml
