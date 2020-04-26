@@ -40,16 +40,6 @@ int pushButton2State = LOW;
 int pushButton3State = LOW;
 int pushButton4State = LOW;
 
-char const * switchTopic1 = "/house/switch1/";            // These are the MQTT Topic that will be used to manage the state of Relays 1 ~ 4
-char const * switchTopic2 = "/house/switch2/";            // Feel free to replicate the line if you have more relay switch to control, but dont forget to increment the number suffix so as increase switch logics in loop()
-char const * switchTopic3 = "/house/switch3/";
-char const * switchTopic4 = "/house/switch4/";
-
-bool updateTrigger = false;
-
-char const * firmwareBuildNumberTopic = "/house/switch/firmware/buildnumber/";
-char const * firmwareUpdateTopic = "/house/switch/firmware/";
-
 WiFiClient wifiClient;
 PubSubClient client(mqtt_server, mqttPort, callback, wifiClient);
 
@@ -71,7 +61,7 @@ void setup() {
   pinMode(PUSH_BUTTON_4, INPUT_PULLUP);
   digitalWrite(RELAY_PIN_4, HIGH);
 
-  ArduinoOTA.setHostname("HA MQTT Switch");     // A name given to your ESP8266 module when discovering it as a port in ARDUINO IDE
+  ArduinoOTA.setHostname(otaHostName);          // A name given to your ESP8266 module when discovering it as a port in ARDUINO IDE
   ArduinoOTA.begin();                           // OTA initialization
   
   Serial.begin(115200);                         // Start the serial line for debugging
@@ -98,58 +88,54 @@ void loop() {
 void callback(char * topic, byte * payload, unsigned int length) {
   String topicStr = topic;                                // Convert topic to string to make it easier to work with
   Serial.println("Callback update.");
-  Serial.print("Topic: ");
+  Serial.println("Topic: ");
   Serial.println(topicStr);                               // Note:  the "topic" value gets overwritten everytime it receives confirmation (callback) message from MQTT
 
-  if (topicStr == "/house/switch1/") {    
+  if (topicStr == bedLightCommandTopic) {    
     if (payload[0] == '1') {                              // Turn the switch on if the payload is '1' and publish to the MQTT server a confirmation message
       digitalWrite(RELAY_PIN_1, LOW);
-      client.publish("/house/switchConfirm1/", "1");
+      client.publish(bedLightStateTopic, "1");
     }    
     else if (payload[0] == '0') {                         // Turn the switch off if the payload is '0' and publish to the MQTT server a confirmation message
       digitalWrite(RELAY_PIN_1, HIGH);
-      client.publish("/house/switchConfirm1/", "0");
+      client.publish(bedLightStateTopic, "0");
     }
-  } else if (topicStr == "/house/switch2/") {
+  } else if (topicStr == backSideLightCommandTopic) {
     if (payload[0] == '1') {                              // Turn the switch on if the payload is '1' and publish to the MQTT server a confirmation message
       digitalWrite(RELAY_PIN_2, LOW);
-      client.publish("/house/switchConfirm2/", "1");
+      client.publish(backSideLightStateTopic, "1");
     }
     else if (payload[0] == '0') {                         // Turn the switch off if the payload is '0' and publish to the MQTT server a confirmation message
       digitalWrite(RELAY_PIN_2, HIGH);
-      client.publish("/house/switchConfirm2/", "0");
+      client.publish(backSideLightStateTopic, "0");
     }
-  } else if (topicStr == "/house/switch3/") {
+  } else if (topicStr == fanCommandTopic) {
     if (payload[0] == '1') {                              // Turn the switch on if the payload is '1' and publish to the MQTT server a confirmation message
       digitalWrite(RELAY_PIN_3, LOW);
-      client.publish("/house/switchConfirm3/", "1");
+      client.publish(fanStateTopic, "1");
     }
     else if (payload[0] == '0') {                         // Turn the switch off if the payload is '0' and publish to the MQTT server a confirmation message
       digitalWrite(RELAY_PIN_3, HIGH);
-      client.publish("/house/switchConfirm3/", "0");
+      client.publish(fanStateTopic, "0");
     }
-  } else if (topicStr == "/house/switch4/") {
+  } else if (topicStr == frontLightCommandTopic) {
     if (payload[0] == '1') {                              // Turn the switch on if the payload is '1' and publish to the MQTT server a confirmation message
       digitalWrite(RELAY_PIN_4, LOW);
-      client.publish("/house/switchConfirm4/", "1");
+      client.publish(frontLightStateTopic, "1");
     }
     else if (payload[0] == '0') {                         // Turn the switch off if the payload is '0' and publish to the MQTT server a confirmation message
       digitalWrite(RELAY_PIN_4, HIGH);
-      client.publish("/house/switchConfirm4/", "0");
+      client.publish(frontLightStateTopic, "0");
     }
-  } else if (topicStr == "/house/switch/firmware/") {
-    Serial.print("Firmware update calling ");
+  } else if (topicStr == firmwareUpdateCommandTopic) {
+    Serial.println("Firmware update calling ");
     if (payload[0] == '1') {                              // Turn the switch on if the payload is '1' and publish to the MQTT server a confirmation message
-      if (!updateTrigger) {                               // Boolean control to avoid calling "checkforupdate()" method for the 1st time after subscribing to MQTT sever
-        updateTrigger = true;
-      } else {
-        Serial.print("Firmware switch on ");
-        checkforupdate();
-      }
+      checkforupdate();
     } else if (payload[0] == '0') {                       // Turn the switch off if the payload is '0' and publish to the MQTT server a confirmation message
-      Serial.print("Firmware switch off ");
+      Serial.println("Firmware switch off ");
     }
   }
+  publishData(BUILD_NUMBER);                              // Sending message to MQTT server to set build number in home assistant UI
 }
 
 void publishData(int p_buildNumber) {                                 // function called to publish the temperature and the humidity  
@@ -157,7 +143,7 @@ void publishData(int p_buildNumber) {                                 // functio
   jsonDocument["buildNumber"] = (String) p_buildNumber;               // INFO: the data must be converted into a string; a problem occurs when using floats...
   char data[200];
   serializeJson(jsonDocument, data);
-  client.publish(firmwareBuildNumberTopic, data, true);               //Publishing data to MQTT server as Json
+  client.publish(firmwareBuildNumberStateTopic, data, true);          //Publishing data to MQTT server as Json
   yield();
 }
 
@@ -167,9 +153,9 @@ void checkPhysicalButton() {
       relay1State = !relay1State;                         // Toggle Relay state
       digitalWrite(RELAY_PIN_1, relay1State);
       if (relay1State == LOW) {
-        client.publish("/house/switchConfirm1/", "1");
+        client.publish(bedLightStateTopic, "1");
       } else {
-        client.publish("/house/switchConfirm1/", "0");
+        client.publish(bedLightStateTopic, "0");
       }
     }
     pushButton1State = LOW;
@@ -182,9 +168,9 @@ void checkPhysicalButton() {
       relay2State = !relay2State;                         // Toggle Relay state
       digitalWrite(RELAY_PIN_2, relay2State);
       if (relay2State == LOW) {
-        client.publish("/house/switchConfirm2/", "1");
+        client.publish(backSideLightStateTopic, "1");
       } else {
-        client.publish("/house/switchConfirm2/", "0");
+        client.publish(backSideLightStateTopic, "0");
       }
     }
     pushButton2State = LOW;
@@ -197,9 +183,9 @@ void checkPhysicalButton() {
       relay3State = !relay3State;                         // Toggle Relay state
       digitalWrite(RELAY_PIN_3, relay3State);
       if (relay3State == LOW) {
-        client.publish("/house/switchConfirm3/", "1");
+        client.publish(fanStateTopic, "1");
       } else {
-        client.publish("/house/switchConfirm3/", "0");
+        client.publish(fanStateTopic, "0");
       }
     }
     pushButton3State = LOW;
@@ -212,9 +198,9 @@ void checkPhysicalButton() {
       relay4State = !relay4State;                         // Toggle Relay state
       digitalWrite(RELAY_PIN_4, relay4State);
       if (relay4State == LOW) {
-        client.publish("/house/switchConfirm4/", "1");
+        client.publish(frontLightStateTopic, "1");
       } else {
-        client.publish("/house/switchConfirm4/", "0");
+        client.publish(frontLightStateTopic, "0");
       }
     }
     pushButton4State = LOW;
@@ -224,11 +210,11 @@ void checkPhysicalButton() {
 }
 
 void reconnectWifi() {
-  Serial.print("");
-  Serial.print("Wifi status = ");
-  Serial.print(WiFi.status());  
+  Serial.println("");
+  Serial.println("Wifi status = ");
+  Serial.println(WiFi.status());  
   if (WiFi.status() != WL_CONNECTED) {                    // Attempt to connect to the wifi if connection is lost
-    Serial.print("Connecting to ");
+    Serial.println("Connecting to ");
     Serial.println(ssid);
         
     while (WiFi.status() != WL_CONNECTED) {               // Loop while we wait for connection
@@ -248,21 +234,21 @@ void reconnectMQTT() {
   delay(1000);  
   if (WiFi.status() == WL_CONNECTED) {                    // Make sure we are connected to WIFI before attemping to reconnect to MQTT    
     while (!client.connected()) {                         // Loop until we're reconnected to the MQTT server
-      Serial.print("Attempting MQTT connection...");      
+      Serial.println("Attempting MQTT connection...");      
       String clientName;                                  // Generate client name based on MAC address and last 8 bits of microsecond counter
       clientName += "esp8266-";
       uint8_t mac[6];
       WiFi.macAddress(mac);
       clientName += macToStr(mac);      
        
-      if (client.connect("ESP8266Client", mqttUser, mqttPassword)) {      // Delete "mqtt_username", and "mqtt_password" here if you are not using any
-        Serial.print("\tMQTT Connected");
-        client.subscribe(switchTopic1);                                   // If connected, subscribe to the topic(s) we want to be notified about
-        client.subscribe(switchTopic2);
-        client.subscribe(switchTopic3);
-        client.subscribe(switchTopic4);                                   // Do not forget to replicate the above line if you will have more than the above number of relay switches
-        client.subscribe(firmwareUpdateTopic);
-        client.publish("/house/switch/Confirmfirmware/", "0");            // Sending message to MQTT server to turn off MQTT firmware upgrade button if its on
+      if (client.connect(mqttClientId, mqttUser, mqttPassword)) {         // Delete "mqtt_username", and "mqtt_password" here if you are not using any
+        Serial.println("\tMQTT Connected");
+        client.subscribe(bedLightCommandTopic);                           // If connected, subscribe to the topic(s) we want to be notified about
+        client.subscribe(backSideLightCommandTopic);
+        client.subscribe(fanCommandTopic);
+        client.subscribe(frontLightCommandTopic);                         // Do not forget to replicate the above line if you will have more than the above number of relay switches
+        client.subscribe(firmwareUpdateCommandTopic);
+        client.publish(firmwareUpdateStateTopic, "0");                    // Sending message to MQTT server to turn off MQTT firmware upgrade button if its on
         publishData(BUILD_NUMBER);                                        // Sending message to MQTT server to set build number in home assistant UI
       }
       else {
@@ -293,7 +279,7 @@ void update_error(int err) {
 
 void checkforupdate() {
   Serial.println("OTA Update Request Received");
-  Serial.print("Firmware URL: ");
+  Serial.println("Firmware URL: ");
   Serial.println(FIRMWARE_URL);
 
   HTTPClient httpClient;
@@ -302,7 +288,7 @@ void checkforupdate() {
 
   if (httpCode == 200) {
     Serial.println("Update file found, starting update");    
-//    ESPhttpUpdate.onStart(update_started);                // Add optional callback notifiers if necessary
+//    ESPhttpUpdate.onStart(update_started);                             // Add optional callback notifiers if necessary
 //    ESPhttpUpdate.onEnd(update_finished);
 //    ESPhttpUpdate.onProgress(update_progress);
 //    ESPhttpUpdate.onError(update_error);
@@ -316,19 +302,19 @@ void checkforupdate() {
       Serial.println("[update] Update no Update.");
       break;
     case HTTP_UPDATE_OK:
-      Serial.println("[update] Update ok.");              // May not called we reboot the ESP
+      Serial.println("[update] Update ok.");                            // May not called we reboot the ESP
       break;
     }
   } else {
     publishData(BUILD_NUMBER);
-    client.publish("/house/switch/Confirmfirmware/", "0");            // Sending message to MQTT server to turn off MQTT firmware upgrade button if its on
-    Serial.print("Firmware check failed, got HTTP response code ");
+    client.publish(firmwareUpdateStateTopic , "0");                     // Sending message to MQTT server to turn off MQTT firmware upgrade button if its on
+    Serial.println("Firmware check failed, got HTTP response code ");
     Serial.println(httpCode);
   }
   httpClient.end();
 }
 
-String macToStr(const uint8_t * mac) {                    // Generate unique name from MAC addr
+String macToStr(const uint8_t * mac) {                                  // Generate unique name from MAC addr
   String result;
   for (int i = 0; i < 6; ++i) {
     result += String(mac[i], 16);
