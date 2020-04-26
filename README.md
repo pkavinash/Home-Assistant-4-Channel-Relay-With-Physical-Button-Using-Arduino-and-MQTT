@@ -39,15 +39,19 @@ D7 or 13 to GND (in NodeMCU) </br>
 ```python
 homeassistant:
   customize: 
-      switch.mqtt_switch_1:
+      switch.bed_light:
+        icon: mdi:ceiling-light 
         assumed_state: false
-      switch.mqtt_switch_2:
+      switch.backside_light:
+        icon: mdi:lightbulb 
         assumed_state: false
-      switch.mqtt_switch_3:
+      switch.front_light:
+        icon: mdi:lightbulb-outline
         assumed_state: false
-      switch.mqtt_switch_4:
+      switch.fan:
+        icon: mdi:fan
         assumed_state: false
-      switch.mqtt_firmware_update:
+      switch.room_firmware_update:
         assumed_state: false
 
 mqtt:
@@ -61,9 +65,9 @@ mqtt:
 
 switch 1:
   - platform: mqtt
-    name: "MQTT Switch 1"
-    state_topic: "/house/switchConfirm1/"
-    command_topic: "/house/switch1/"
+    name: "Bed Light"
+    state_topic: "/house/room/confirmbedlight/"
+    command_topic: "/house/room/bedlight/"
     payload_on: "1"
     payload_off: "0"
     optimistic: true
@@ -71,9 +75,9 @@ switch 1:
 
 switch 2:
   - platform: mqtt
-    name: "MQTT Switch 2"
-    state_topic: "/house/switchConfirm2/"
-    command_topic: "/house/switch2/"
+    name: "Backside Light"
+    state_topic: "/house/room/confirmbacksidelight/"
+    command_topic: "/house/room/backsidelight/"
     payload_on: "1"
     payload_off: "0"
     optimistic: true
@@ -81,9 +85,9 @@ switch 2:
 
 switch 3:
   - platform: mqtt
-    name: "MQTT Switch 3"
-    state_topic: "/house/switchConfirm3/"
-    command_topic: "/house/switch3/"
+    name: "Fan"
+    state_topic: "/house/room/confirmfan/"
+    command_topic: "/house/room/fan/"
     payload_on: "1"
     payload_off: "0"
     optimistic: true
@@ -91,29 +95,29 @@ switch 3:
 
 switch 4:
   - platform: mqtt
-    name: "MQTT Switch 4"
-    state_topic: "/house/switchConfirm4/"
-    command_topic: "/house/switch4/"
+    name: "Front Light"
+    state_topic: "/house/room/confirmfrontlight/"
+    command_topic: "/house/room/frontlight/"
     payload_on: "1"
     payload_off: "0"
     optimistic: true
     qos: 0
 
   - platform: mqtt
-    name: "MQTT Firmware Update"
-    state_topic: "/house/switch/Confirmfirmware/"
-    command_topic: "/house/switch/firmware/"
+    name: "Room Firmware Update"
+    state_topic: "/house/room/confirmfirmware/"
+    command_topic: "/house/room/firmware/"
     payload_on: "1"
     payload_off: "0"
     optimistic: true
-    qos: 0   
+    qos: 0 
 ```
 
 ### Add in sensors.yaml
 ```python
   - platform: mqtt
-    name: "MQTT Build Number"
-    state_topic: "/house/switch/firmware/buildnumber/"
+    name: "Room Build Number"
+    state_topic: "/house/room/firmware/confirmbuildnumber/"
     value_template: '{{ value_json.buildNumber }}'
 ```
 
