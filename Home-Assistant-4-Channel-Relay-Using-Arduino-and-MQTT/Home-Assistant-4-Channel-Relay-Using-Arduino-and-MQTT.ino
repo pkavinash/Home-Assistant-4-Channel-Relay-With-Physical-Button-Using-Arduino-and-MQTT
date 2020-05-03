@@ -78,8 +78,8 @@ void loop() {
   } else if (!client.connected()) {
     reconnectMQTT();
   } else {    
-    client.loop();                              // Maintain MQTT connection
-    checkPhysicalButton();    
+    checkPhysicalButton(); 
+    client.loop();                              // Maintain MQTT connection   
     delay(10);                                  // MUST delay to allow ESP8266 WIFI functions to run
     ArduinoOTA.handle();
   }
@@ -218,8 +218,8 @@ void reconnectWifi() {
     Serial.println(ssid);
         
     while (WiFi.status() != WL_CONNECTED) {               // Loop while we wait for connection
-      delay(500);
       checkPhysicalButton();
+      delay(500);
     }
 
     Serial.println("");
@@ -234,6 +234,7 @@ void reconnectMQTT() {
   delay(1000);  
   if (WiFi.status() == WL_CONNECTED) {                    // Make sure we are connected to WIFI before attemping to reconnect to MQTT    
     while (!client.connected()) {                         // Loop until we're reconnected to the MQTT server
+      checkPhysicalButton();
       Serial.println("Attempting MQTT connection...");      
       String clientName;                                  // Generate client name based on MAC address and last 8 bits of microsecond counter
       clientName += "esp8266-";
@@ -253,7 +254,7 @@ void reconnectMQTT() {
       }
       else {
         Serial.println("\tFailed.");
-        abort();
+        checkPhysicalButton();
       }
     }
   } else {

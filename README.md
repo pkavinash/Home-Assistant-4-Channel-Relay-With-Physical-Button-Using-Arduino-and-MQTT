@@ -54,15 +54,6 @@ homeassistant:
       switch.room_firmware_update:
         assumed_state: false
 
-mqtt:
-  discovery: true
-  discovery_prefix: homeassistant
-  broker: xxx.xxx.xxx.xxx
-  port: xxxx
-  client_id: Home-Assistant
-  username: Your-MQTT-Username
-  password: Your-MQTT-Password
-
 switch 1:
   - platform: mqtt
     name: "Bed Light"

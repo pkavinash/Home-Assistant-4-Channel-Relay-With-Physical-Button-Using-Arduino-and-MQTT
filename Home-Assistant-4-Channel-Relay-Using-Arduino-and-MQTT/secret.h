@@ -13,7 +13,7 @@ const char* password = "Your Wifi Password";
 /***************************************************
           MQTT Server Settings
  **************************************************/
-const char* mqtt_server = "xxx.xxx.xx.xxx";           //MQTT server ip address
+const char* mqtt_server = "xxx.xxx.xx.xxx";           //MQTT server ip address or hostname
 const int mqttPort = xxxx;                            //MQTT broker port
 
 const char* mqttUser = "Your MQTT Username";          //MQTT broker username
